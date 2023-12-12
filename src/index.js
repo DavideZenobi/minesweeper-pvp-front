@@ -3,12 +3,19 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { AuthProvider } from './contexts/AuthContext';
+import { WebSocketProvider } from './contexts/WebSocketContext';
+import { UserQueueProvider } from './contexts/UserQueueContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <AuthProvider>
+    <WebSocketProvider>
+      <UserQueueProvider>
+        <App />
+      </UserQueueProvider>
+    </WebSocketProvider>
+  </AuthProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function
