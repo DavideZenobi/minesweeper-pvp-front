@@ -3,18 +3,18 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { AuthProvider } from './contexts/AuthContext';
-import { WebSocketProvider } from './contexts/WebSocketContext';
-import { UserQueueProvider } from './contexts/UserQueueContext';
+import { AuthProvider } from './v2/contexts/AuthContext';
+import { UserQueueProvider } from './v2/contexts/UserQueueContext';
+import { EventSourceProvider } from './v2/contexts/EventSourceContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <AuthProvider>
-    <WebSocketProvider>
+    <EventSourceProvider>
       <UserQueueProvider>
         <App />
       </UserQueueProvider>
-    </WebSocketProvider>
+    </EventSourceProvider>
   </AuthProvider>
 );
 
