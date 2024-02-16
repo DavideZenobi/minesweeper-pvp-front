@@ -26,6 +26,14 @@ export const register = async (data) => {
     return response;
 }
 
+export const verifyUser = async (uuid) => {
+    const response = await fetch(publicUrl + `/confirm/${uuid}`, {
+        method: 'GET'
+    });
+
+    return response;
+}
+
 export const getEmailAvailability = async (email) => {
     const response = await fetch(publicUrl + `/email/available/${email}`, {
         method: 'GET',

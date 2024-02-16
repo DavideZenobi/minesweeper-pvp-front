@@ -4,6 +4,7 @@ import { useAuthContext } from "../contexts/AuthContext";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 import AccountBoxIcon from '@mui/icons-material/AccountBox';
+import HistoryIcon from '@mui/icons-material/History';
 import { useState } from "react";
 import { FindMatchModal } from "./modals/FindMatchModal";
 
@@ -54,6 +55,9 @@ export const TopBar = () => {
             >
                 <MenuItem onClick={() => navigate('/profile')}>
                     <AccountBoxIcon /> Profile
+                </MenuItem>
+                <MenuItem onClick={() => navigate('/history')}>
+                    <HistoryIcon /> History
                 </MenuItem>
                 <MenuItem sx={{color: 'red'}} onClick={handleLogout}>
                     <LogoutIcon /> Log out

@@ -22,7 +22,11 @@ import { TopBar } from './v2/components/TopBar';
 import { GamePvE } from './v2/pages/GamePvE';
 import { Profile } from './v2/pages/Profile';
 import { MatchValidator } from './v2/components/MatchValidator';
-import { AccountCreated } from './v2/pages/AccountCreated';
+import { AccountConfirmed } from './v2/pages/AccountConfirmed';
+import { History } from './v2/pages/History';
+import { HistoryMatch } from './v2/pages/HistoryMatch';
+import { RootV2 } from './v2/components/RootV2';
+import { Index } from './v2/pages/Index';
 
 function App() {
 
@@ -31,11 +35,13 @@ function App() {
 			<Route path='/' element={<Root />}>
 				<Route index element={<ProtectedLogin><Login /></ProtectedLogin>} />
 				<Route path='register' element={<Register />} />
-				<Route path='accountcreated' element={<AccountCreated />} />
+				<Route path='confirm/:uuid' element={<AccountConfirmed />} />
 				<Route path='*' element={<ProtectedRoute />} >
 					<Route element={<TopBar />} >
 						<Route path='home' element={<Home />} />
 						<Route path='profile' element={<Profile />} />
+						<Route path='history' element={<History />} />
+						<Route path='history/:matchId' element={<HistoryMatch />} />
 						<Route path='game' element={<GamePvE />} />
 						<Route path='game/:matchId' element={<MatchValidator><GamePvP /></MatchValidator>} />
 						<Route path='test' element={<h2>TEST</h2>} />
@@ -45,9 +51,29 @@ function App() {
 		)
 	);
 
+	const routerV2 = createBrowserRouter(
+		createRoutesFromElements(
+			<Route path='/' element={<RootV2 />}>
+				<Route index element={<Index />} />
+				<Route path='login' element={<ProtectedLogin><Login /></ProtectedLogin>} />
+				<Route path='register' element={<Register />} />
+				<Route path='confirm/:uuid' element={<AccountConfirmed />} />
+				<Route path='test' element={<h2>TEST</h2>} />
+				<Route path='*' element={<ProtectedRoute />} >
+					<Route path='home' element={<Home />} />
+					<Route path='profile' element={<Profile />} />
+					<Route path='history' element={<History />} />
+					<Route path='history/:matchId' element={<HistoryMatch />} />
+					<Route path='game' element={<GamePvE />} />
+					<Route path='game/:matchId' element={<MatchValidator><GamePvP /></MatchValidator>} />
+				</Route>
+			</Route>
+		)
+	);
+
   	return (
     	<>
-			<RouterProvider router={router}>
+			<RouterProvider router={routerV2}>
 
 			</RouterProvider>
     	</>

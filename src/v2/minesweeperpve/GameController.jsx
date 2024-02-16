@@ -1,108 +1,103 @@
 import { useEffect, useState } from "react";
-import { gameConfigs } from "../utils/gameconfigs";
-import { Config } from "./Config";
-import { Box, Button } from "@mui/material";
+import { changeLevel, createGamePvE, deleteGamePvE, leftClick, rightClick } from "../api/privateApi";
 import { Board } from "./Board";
-import { useWebSocketContext } from "../contexts/WebSocketContext";
-import { getSocket } from "../websocket/websocket";
-import { Timer } from "./Timer";
-import { MovementTimer } from "./MovementTimer";
+import { BoardInfo } from "./BoardInfo";
+import { useEventSourceContext } from "../contexts/EventSourceContext";
+import { gameConfigs } from "../utils/gameconfigs";
 import { FinalGameModal } from "./FinalGameModal";
 
-const sideBox = {
-    width: '25%',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    rowGap: '20px',
-}
-
-const container = {
-    border: '2px solid black',
-    borderRadius: '30px',
-    backgroundColor: 'lightsteelblue',
-    // paddingTop: '10px',
-    paddingRight: '20px',
-    paddingLeft: '20px',
-    paddingBottom: '20px',
-}
-
 export const GameController = () => {
-    const { isWebSocketInit } = useWebSocketContext();
-
-    const socket = getSocket();
+    const { eventSource } = useEventSourceContext();
 
     const [isLoading, setIsLoading] = useState(true);
     const [isGameRunning, setIsGameRunning] = useState(false);
-    const [gameConfig, setGameConfig] = useState(gameConfigs['easy']);
-    const [reset, setReset] = useState(false);
-    const [newResponseData, setNewResponseData] = useState(null);
-    const [minesLeft, setMinesLeft] = useState(gameConfig.minesQuantity);
-    const [resetMovementTimer, setResetMovementTimer] = useState(false);
-    const [isFinalModalOpen, setIsFinalModalOpen] = useState(false);
-    const [result, setResult] = useState({}); // {status, score, time}
+    const [firstClicked, setFirstClicked] = useState(false);
+    const [updatedCells, setUpdatedCells] = useState();
+    const [resetMoveTimer, setResetMoveTimer] = useState(false);
+    const [minesLeft, setMinesLeft] = useState(gameConfigs['easy'].minesQuantity);
+    const [selectedLevel, setSelectedLevel] = useState('easy');
+    const [openModal, setOpenModal] = useState(false);
 
-    /*useEffect(() => {
-        const eventSource = new EventSource('http://localhost:3000/api/private/sse/', {withCredentials: true});
-
-        eventSource.onmessage = (event) => {
-            console.log(event.data);
-        }
-    }, []);*/
-    
     useEffect(() => {
-        if (isWebSocketInit) {
-            socket.emit('create-minesweeper-pve-solo', () => {
+        const create = async () => {
+            const response = await createGamePvE();
+            if (response.ok) {
                 setIsLoading(false);
-            });
-
-            socket.on('game-finished', (result) => {
-                setResult(result);
-                setIsFinalModalOpen(true);
-                setIsGameRunning(false);
-            });
+                setIsGameRunning(true);
+            }
         }
-    }, [isWebSocketInit]);
+    
+        create();
+        return () => {
+            deleteGamePvE();
+        }
+    }, []);
 
-    const resetGame = () => {
-        socket.emit('reset', () => {
-            setIsGameRunning(false);
-            setReset(!reset);
-        });
-    }   
+    useEffect(() => {
+        if (eventSource) {
+            eventSource.addEventListener('game-finished', handleGameFinished);
+            eventSource.addEventListener('lost-by-time', handleLostByTime);
+            return () => {
+                eventSource.removeEventListener('game-finished', handleGameFinished);
+                eventSource.removeEventListener('lost-by-time', handleLostByTime);
+            }
+        }
+    }, [eventSource]);
 
-    const handleConfigChange = (level) => {
-        socket.emit('level-changed', (level), () => {
-            setNewResponseData(null);
-            setGameConfig(gameConfigs[level]);
-            setIsGameRunning(false);
-        });
+    /**
+     * Eventos SSE
+     */
+    const handleGameFinished = () => {
+        setIsGameRunning(false);
+        setFirstClicked(false);
+        setOpenModal(true);
     }
 
-    const handleClick = (position, event) => {
-        if (event !== undefined) {
+    const handleLostByTime = () => {
+        setIsGameRunning(false);
+        setFirstClicked(false);
+        setOpenModal(true);
+    }
+
+
+    /**
+     * ****************************************************************
+     */
+
+
+    const handleLevelChange = async (level) => {
+        const response = await changeLevel(level);
+    }
+
+    const handleClick = async (position, event) => {
+        if (event) {
             event.preventDefault();
-            socket.emit('right-click-cell', (position), (responseData) => {
-                if (responseData.length > 0) {
-                    if (responseData[0].isFlagged) {
+        }
+
+        if (isGameRunning) {
+            if (event) {
+                const response = await rightClick(position);
+                if (response.ok) {
+                    const data = await response.json();
+                    setUpdatedCells(data);
+                    if (data[0].isFlagged) {
                         setMinesLeft(minesLeft - 1);
                     } else {
                         setMinesLeft(minesLeft + 1);
                     }
-                    setNewResponseData(responseData);
                 }
-            });
-        } else {
-            socket.emit('left-click-cell', (position), (responseData) => {
-                setResetMovementTimer(!resetMovementTimer);
-                setIsGameRunning(true);
-                if (responseData) {
-                    setNewResponseData(responseData);
+                
+            } else {
+                const response = await leftClick(position);
+                if (response.ok) {
+                    const data = await response.json();
+                    setFirstClicked(true);
+                    setUpdatedCells(data);
+                    setResetMoveTimer(!resetMoveTimer);
                 }
-            });
+                
+            }
         }
-        
     }
 
     if (isLoading) {
@@ -111,45 +106,32 @@ export const GameController = () => {
 
     return (
         <>  
-            <Box sx={sideBox}>
-                <Box sx={{ width: '200px', height: '50px', border: '2px solid black', borderRadius: '20px', backgroundColor: 'lightsteelblue', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                    <Timer 
-                        running={isGameRunning} 
+            <div className="flex flex-col justify-start items-center gap-y-10 w-full">
+                <div className="mt-10">
+                    <BoardInfo
+                        hasGameStarted={isGameRunning && firstClicked}
+                        updatedMinesLeft={minesLeft}
+                        selectedLevel={selectedLevel}
+                        onLevelChange={handleLevelChange}
+                        onCellLeftClicked={resetMoveTimer}
                     />
-                </Box>
-                <Box sx={{ width: '200px', height: '50px', border: '2px solid black', borderRadius: '20px', backgroundColor: 'lightsteelblue', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                    <MovementTimer
-                        running={isGameRunning}
-                        ownReset={resetMovementTimer}
+                </div>
+                <div>
+                    <Board
+                        onClick={handleClick}
+                        newCells={updatedCells}
                     />
-                </Box>
-                <Box sx={{ width: '200px', height: '50px', border: '2px solid black', borderRadius: '20px', backgroundColor: 'lightsteelblue', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                    <p style={{fontWeight: 'bold'}}>Mines left: {minesLeft}</p>
-                </Box>
-                <Box sx={{ width: '200px', height: '50px', border: '2px solid black', borderRadius: '20px', backgroundColor: 'lightsteelblue', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
-                    <Button onClick={resetGame} sx={{margin: '20px'}} variant="contained" color="warning" size="small">Reset</Button>
-                </Box>
-            </Box>
-            <Box sx={{ width: '50%', display: 'flex', flexDirection: 'row' }}>
-                <Board
-                    key={reset}
-                    gameConfig={gameConfig}
-                    onClick={handleClick}
-                    newCells={newResponseData}
+                </div>
+                <div>
+                    <div className="flex justify-center items-center w-24 border border-black rounded-sm bg-green-800 hover:bg-green-700 cursor-pointer shadow-xl">
+                        <p className="text-slate-300">Reset</p>
+                    </div>
+                </div>
+                <FinalGameModal 
+                    isOpen={openModal}
+                    onClose={() => setOpenModal(false)}
                 />
-            </Box>
-            <Box sx={sideBox}>
-                <Box sx={container}>
-                    <Config
-                        onChange={handleConfigChange}
-                    />
-                </Box>  
-            </Box>
-            <FinalGameModal 
-                isOpen={isFinalModalOpen}
-                result={result}
-                setIsOpen={setIsFinalModalOpen}
-            />
+            </div>
         </>
     );
 }

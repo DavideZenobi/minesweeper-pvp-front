@@ -1,13 +1,40 @@
-import { Box, Dialog, DialogTitle, Divider } from "@mui/material";
+import { useEffect } from "react";
 
 
-export const FinalGameModal = ({ isOpen, result, setIsOpen }) => {
+export const FinalGameModal = ({ isOpen, result, onClose }) => {
 
+    useEffect(() => {
+        if (isOpen) {
+            openModal();
+        }
+    }, [isOpen]);
 
+    const openModal = () => {
+        const dialog = document.getElementById('dialog');
+        dialog.showModal();
+    }
+
+    const closeModal = () => {
+        const dialog = document.getElementById('dialog');
+        dialog.close();
+        onClose();
+    }
 
     return (
         <>
-            <Dialog
+            <dialog
+                id="dialog"
+                onClick={closeModal}
+                className="backdrop:backdrop-blur-sm"
+            >
+                Hola
+            </dialog>
+        </>
+    );
+}
+
+/**
+ * <Dialog
                 open={isOpen}
                 onClose={() => setIsOpen(false)}
             >
@@ -18,6 +45,4 @@ export const FinalGameModal = ({ isOpen, result, setIsOpen }) => {
                     <p>Time: {result.time} seconds</p>
                 </Box>
             </Dialog>
-        </>
-    );
-}
+ */

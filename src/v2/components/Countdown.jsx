@@ -1,18 +1,19 @@
 import { useEffect, useState } from "react";
 
-export const Timer = ({ running = false, onReset }) => {
-    const [minutes, setMinutes] = useState(0);
-    const [seconds, setSeconds] = useState(0);
+
+export const Countdown = ({ running = false, reset }) => {
+    const [seconds, setSeconds] = useState(30);
 
     useEffect(() => {
         if (running) {
             const intervalId = setInterval(() => {
                 setSeconds((prevSeconds) => {
-                    if (prevSeconds + 1 === 60) {
-                        setMinutes(prevMinutes => prevMinutes + 1);
+                    if (prevSeconds - 1 === 0) {
+                        clearInterval(intervalId);
                         return 0;
+
                     } else {
-                        return prevSeconds + 1;
+                        return prevSeconds - 1;
                     }
                 })
             }, 1 * 1000);
@@ -20,12 +21,16 @@ export const Timer = ({ running = false, onReset }) => {
             return () => {
                 clearInterval(intervalId);
             }
-        } 
+        }
     }, [running]);
+
+    useEffect(() => {
+        setSeconds(30);
+    }, [reset]);
 
     return (
         <>
-            <p className="font-bold">{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</p>
+            <p className="font-bold">{String(seconds).padStart(2, '0')}</p>
         </>
-    );
+    )
 }

@@ -8,11 +8,11 @@ export const Root = () => {
     const containerStyle = {
         display: 'flex',
         flexDirection: 'column',
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: 'cover',
-        backgroundRepeat: 'no-repeat',
+        //backgroundImage: `url(${backgroundImage})`,
+        //backgroundSize: 'cover',
+        //backgroundRepeat: 'no-repeat',
+        backgroundColor: '#31465b',
         height: '100vh',
-        //fontFamily: Orbitron,
     }
 
     return (

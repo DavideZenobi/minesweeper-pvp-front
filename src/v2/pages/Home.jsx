@@ -25,7 +25,7 @@ export const Home = () => {
         rowGap: '20px',
         border: '2px solid black',
         borderRadius: '30px',
-        backgroundColor: 'lightsteelblue',
+        backgroundColor: '#293847',
     }
 
     const handleJoinQueue = async () => {

@@ -1,8 +1,9 @@
 import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Cell } from "./Cell";
+import { gameConfigs } from "../utils/gameconfigs";
 
-export const Board = ({ gameConfig, onClick, newCells }) => {
+export const Board = ({ gameConfig = gameConfigs.easy, onClick, newCells = null }) => {
 
     const [cells, setCells] = useState(
         Array.from({ length: gameConfig.squaresPerHeight }, (_unused, rowIndex) => 
@@ -62,19 +63,6 @@ export const Board = ({ gameConfig, onClick, newCells }) => {
         );
     }, [gameConfig]);
 
-    const containerStyle = {
-        width: gameConfig.width + 50,
-        height: gameConfig.width + 50,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        border: '2px solid black',
-        borderRadius: '20px',
-        backgroundColor: 'lightsteelblue',
-        rowGap: '20px',
-    }
-
     const boardStyle = {
         display: 'flex',
         flexDirection: 'row',
@@ -85,20 +73,16 @@ export const Board = ({ gameConfig, onClick, newCells }) => {
 
     return (
         <>
-            <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
-                <Box sx={containerStyle}>
-                    <Box sx={boardStyle}>
-                        {cells.map((row, rowIndex) => (
-                            row.map((col, colIndex) => (
-                                <Cell
-                                    key={`${rowIndex}-${colIndex}`}
-                                    cell={cells[rowIndex][colIndex]}
-                                    onClick={onClick}
-                                />
-                            ))
-                        ))}
-                    </Box>
-                </Box>
+            <Box sx={boardStyle}>
+                {cells.map((row, rowIndex) => (
+                    row.map((col, colIndex) => (
+                        <Cell
+                            key={`${rowIndex}-${colIndex}`}
+                            cell={cells[rowIndex][colIndex]}
+                            onClick={onClick}
+                        />
+                    ))
+                ))}
             </Box>
         </>
     );

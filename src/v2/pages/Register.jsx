@@ -1,8 +1,9 @@
-import { Box, Button, InputAdornment, TextField } from "@mui/material";
+import { Box, Button, Dialog, DialogTitle, IconButton, InputAdornment, TextField } from "@mui/material";
 import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import EmailIcon from '@mui/icons-material/Email';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import CloseIcon from '@mui/icons-material/Close';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
 import KeyIcon from '@mui/icons-material/Key';
@@ -25,6 +26,8 @@ export const Register = () => {
     const [isPasswordOk, setIsPasswordOk] = useState(null);
     const [isRepeatPasswordOk, setIsRepeatPasswordOk] = useState(null);
 
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     const isButtonDisabled = useMemo(() => {
         return !isEmailOk || !isUsernameOk || !arePasswordsMatching;
     }, [isEmailOk, isUsernameOk, arePasswordsMatching]);
@@ -38,8 +41,8 @@ export const Register = () => {
     }
 
     const containerStyle = {
-        width: '400px',
-        height: '450px',
+        width: '500px',
+        height: '600px',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -109,7 +112,7 @@ export const Register = () => {
         if (isEmailOk === null) {
             return <></>
         } else if (isEmailOk) {
-            return <><CheckCircleOutlineIcon style={{ verticalAlign: 'middle' }} />&nbsp;</>
+            return <><CheckCircleOutlineIcon style={{ verticalAlign: 'middle' }} />&nbsp;hola</>
         } else {
             return <><ErrorOutlineIcon style={{ verticalAlign: 'middle' }} />&nbsp;</>
         }
@@ -119,7 +122,7 @@ export const Register = () => {
         const dataToSend = { email: emailInput, username: usernameInput, password: passwordInput };
         const response = await register(dataToSend);
         if (response.ok) {
-            navigate('/accountcreated');
+            setIsModalOpen(true);
         } else {
             
         }
@@ -133,9 +136,10 @@ export const Register = () => {
                     <Box sx={{display: 'flex', flexDirection: 'row', alignItems: 'center'}}>
                         <TextField
                             onChange={handleEmailChange}
-                            variant="standard"
+                            sx={{width: '300px'}}
+                            variant="outlined"
                             label='Email'
-                            helperText={getEmailFeedback()}
+                            helperText={getEmailFeedback}
                             size="small"
                             InputProps={{
                                 startAdornment: (
@@ -154,9 +158,9 @@ export const Register = () => {
                     <Box>
                         <TextField
                             onChange={handleUsernameChange}
-                            variant="standard"
+                            variant="outlined"
                             label='Username'
-                            helperText=''
+                            helperText=' '
                             size="small"
                             InputProps={{
                                 startAdornment: (
@@ -170,8 +174,9 @@ export const Register = () => {
                     <Box>
                         <TextField
                             onChange={handlePasswordChange}
-                            variant="standard"
+                            variant="outlined"
                             label='Password'
+                            helperText=' '
                             type="password"
                             size="small"
                             InputProps={{
@@ -186,8 +191,9 @@ export const Register = () => {
                     <Box>
                         <TextField
                             onChange={handleRepeatPasswordChange}
-                            variant="standard"
+                            variant="outlined"
                             label='Repeat password'
+                            helperText=' '
                             type="password"
                             size="small"
                             InputProps={{
@@ -199,9 +205,39 @@ export const Register = () => {
                             }}
                         />
                     </Box>
+                    <p>Already have an account? <Link to='/login'>Log in</Link></p>
                     <Button disabled={isButtonDisabled} onClick={handleRegister} variant="contained" size="small">Register</Button>
                 </Box>
             </Box>
+            <Dialog
+                open={isModalOpen}
+                onClose={() => navigate('/login')}
+                PaperProps={{ sx: { maxWidth: 'none' } }}
+            >
+                <Box sx={{display: 'flex', flexDirection: 'row', width: '100%'}}>
+                    <Box sx={{width: '10%'}}>
+                        <IconButton
+                            edge="start"
+                            color="inherit"
+                            onClick={() => navigate('/login')}
+                            aria-label="close"
+                            sx={{marginLeft: '10px'}}
+                        >
+                            <CloseIcon />
+                        </IconButton>
+                    </Box>
+                    <Box sx={{width: '90%'}}>
+                        <CheckCircleOutlineIcon sx={{ color: 'green' }} />
+                    </Box>
+                    
+                </Box>
+                
+                <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', width: '700px'}}>
+                    <p>Your account has been created. </p>
+                    <p>An email has been sent to <span style={{fontWeight: 'bold'}}>{emailInput}</span> to verify the user</p>
+                    <p style={{fontWeight: 'bold', fontStyle: 'italic'}}>*You will be redirected to login page after closing this window*</p>
+                </Box>
+            </Dialog>
         </>
     );
 }
