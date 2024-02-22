@@ -4,9 +4,7 @@ import { Timer } from "./Timer";
 import { Countdown } from "../components/Countdown";
 
 
-export const BoardInfo = ({ hasGameStarted = false, updatedMinesLeft = 35, selectedLevel = 'easy', onLevelChange, onCellLeftClicked }) => {
-
-
+export const BoardInfo = ({ hasGameStarted = false, updatedMinesLeft = 35, selectedLevel = 'easy', onLevelChange, reset, onCellLeftClicked }) => {
 
     const handleChangeLevel = (e) => {
         onLevelChange(e.target.value);
@@ -32,8 +30,8 @@ export const BoardInfo = ({ hasGameStarted = false, updatedMinesLeft = 35, selec
                         </select>
                         <p>{gameConfigs[selectedLevel].squaresPerWidth}x{gameConfigs[selectedLevel].squaresPerHeight}</p>
                         <p>{updatedMinesLeft}</p>
-                        <Timer running={hasGameStarted} />
-                        <Countdown running={hasGameStarted} reset={onCellLeftClicked} />
+                        <Timer reset={reset} running={hasGameStarted} />
+                        <Countdown reset={reset} running={hasGameStarted} update={onCellLeftClicked} />
                     </div>
                 </div>
             </div>

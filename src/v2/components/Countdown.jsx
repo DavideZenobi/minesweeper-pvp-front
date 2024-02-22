@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 
-export const Countdown = ({ running = false, reset }) => {
+export const Countdown = ({ running = false, update, reset }) => {
     const [seconds, setSeconds] = useState(30);
 
     useEffect(() => {
@@ -23,6 +23,10 @@ export const Countdown = ({ running = false, reset }) => {
             }
         }
     }, [running]);
+
+    useEffect(() => {
+        setSeconds(30);
+    }, [update]);
 
     useEffect(() => {
         setSeconds(30);

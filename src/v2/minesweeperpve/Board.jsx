@@ -1,79 +1,24 @@
-import { Box } from "@mui/material";
-import { useEffect, useState } from "react";
 import { Cell } from "./Cell";
-import { gameConfigs } from "../utils/gameconfigs";
 
-export const Board = ({ gameConfig = gameConfigs.easy, onClick, newCells = null }) => {
-
-    const [cells, setCells] = useState(
-        Array.from({ length: gameConfig.squaresPerHeight }, (_unused, rowIndex) => 
-            Array.from({ length: gameConfig.squaresPerWidth }, (__unused, colIndex) => (
-                {
-                    isMine: false,
-                    isOpen: false,
-                    isFlagged: false,
-                    neighborMines: 0,
-                    position: {
-                        rowIndex: rowIndex,
-                        colIndex: colIndex,
-                    }
-                }
-            ))
-        )
-    );
-
-    useEffect(() => {
-        if (newCells !== null) {
-            setCells(prevCells => {
-                const newObjectToSet = [...prevCells];
-
-                prevCells.forEach((prevRowCells, rowIndex) => {
-                    prevRowCells.forEach((prevCell, colIndex) => {
-                        newCells.forEach(newCell => {
-                            if (prevCell.position.rowIndex === newCell.position.rowIndex && prevCell.position.colIndex === newCell.position.colIndex) {
-                                newObjectToSet[rowIndex][colIndex] = newCell;
-                            }
-                        });
-                    })
-                    
-                })
-
-                return newObjectToSet;
-            });
-            
+export const Board = ({ cells, level, onClick }) => {
+    const sizes = {
+        easy: {
+            width: 'w-[350px]',
+            height: 'h-[350px]'
+        },
+        medium: {
+            width: 'w-[500px]',
+            height: 'h-[500px]'
+        },
+        hard: {
+            width: 'w-[750px]',
+            height: 'h-[650px]'
         }
-    }, [newCells]);
-
-    useEffect(() => {
-        setCells(
-            Array.from({ length: gameConfig.squaresPerHeight }, (_unused, rowIndex) => 
-                Array.from({ length: gameConfig.squaresPerWidth }, (__unused, colIndex) => (
-                    {
-                        isMine: false,
-                        isOpen: false,
-                        isFlagged: false,
-                        neighborMines: 0,
-                        position: {
-                            rowIndex: rowIndex,
-                            colIndex: colIndex,
-                        }
-                    }
-                ))
-            )
-        );
-    }, [gameConfig]);
-
-    const boardStyle = {
-        display: 'flex',
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        width: gameConfig.width,
-        height: gameConfig.height,   
     }
 
     return (
         <>
-            <Box sx={boardStyle}>
+            <div className={`flex flex-row flex-wrap ${sizes[level].width} `}>
                 {cells.map((row, rowIndex) => (
                     row.map((col, colIndex) => (
                         <Cell
@@ -83,7 +28,7 @@ export const Board = ({ gameConfig = gameConfigs.easy, onClick, newCells = null 
                         />
                     ))
                 ))}
-            </Box>
+            </div>
         </>
-    );
+    )
 }

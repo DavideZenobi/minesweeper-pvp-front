@@ -11,6 +11,7 @@ import { SideBarItem } from "./SideBarItem";
 import { SnackbarCustom } from "../SnackbarCustom";
 import { useState } from "react";
 import { Snackbar } from "@mui/material";
+import { SettingsModal } from "../SettingsModal";
 
 export const SideBar = () => {
     const { isAuthenticated } = useAuthContext();
@@ -19,6 +20,7 @@ export const SideBar = () => {
     const navigate = useNavigate();
 
     const [openSnackbar, setOpenSnackbar] = useState(false);
+    const [openSettingsModal, setOpenSettingsModal] = useState(false);
 
     const handleLogout = async () => {
         const response = await logoutCx();
@@ -66,7 +68,7 @@ export const SideBar = () => {
                     </div>
                 </div>
                 <div id="sidebar-bottom" className="">
-                    <SideBarItem text='Settings' icon={SettingsIcon} onClick={() => navigate('/profile')} />
+                    <SideBarItem text='Settings' icon={SettingsIcon} onClick={() => setOpenSettingsModal(true)} />
                     {isAuthenticated
                         ?   <div onClick={handleLogout} className='flex flex-row justify-center items-center w-full gap-x-2 h-12 font-bold'>
                                 <div className="flex justify-center items-center rounded-md w-36 h-8 bg-red-500 hover:bg-red-600 hover:cursor-pointer">
@@ -77,6 +79,7 @@ export const SideBar = () => {
                     }
                 </div>
             </div>
+            <SettingsModal isOpen={openSettingsModal} onClose={() => setOpenSettingsModal(false)} />
             <SnackbarCustom active={openSnackbar} text='Logged out succesfully!' onClose={handleOnCloseSnackbar} />
             
         </>

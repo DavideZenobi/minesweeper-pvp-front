@@ -8,18 +8,21 @@ import { UserQueueProvider } from './v2/contexts/UserQueueContext';
 import { EventSourceProvider } from './v2/contexts/EventSourceContext';
 import { WindowSizeProvider } from './v2/contexts/WindowSizeContext';
 import { SnackbarProvider } from './v2/contexts/SnackbarContext';
+import { AudioSettingsProvider } from './v2/contexts/AudioSettingsContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <SnackbarProvider>
-    <AuthProvider>
-      <EventSourceProvider>
-        <UserQueueProvider>
-          <App />
-        </UserQueueProvider>
-      </EventSourceProvider>
-    </AuthProvider>
+  <AudioSettingsProvider>
+    <SnackbarProvider>
+      <AuthProvider>
+        <EventSourceProvider>
+          <UserQueueProvider>
+            <App />
+          </UserQueueProvider>
+        </EventSourceProvider>
+      </AuthProvider>
   </SnackbarProvider>
+  </AudioSettingsProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function

@@ -222,6 +222,15 @@ export const changeLevel = async (level) => {
     return response;
 }
 
+export const resetGame = async () => {
+    const response = await fetch(privateUrl + '/gamepve/reset', {
+        method: 'GET',
+        credentials: 'include',
+    });
+
+    return response;
+}
+
 /**
  * History
  */

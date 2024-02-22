@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export const Timer = ({ running = false, onReset }) => {
+export const Timer = ({ running = false, reset }) => {
     const [minutes, setMinutes] = useState(0);
     const [seconds, setSeconds] = useState(0);
 
@@ -22,6 +22,11 @@ export const Timer = ({ running = false, onReset }) => {
             }
         } 
     }, [running]);
+
+    useEffect(() => {
+        setMinutes(0);
+        setSeconds(0);
+    }, [reset]);
 
     return (
         <>
