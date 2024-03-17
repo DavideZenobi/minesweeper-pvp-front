@@ -1,17 +1,18 @@
-import { useEffect, useState } from "react";
-import { changeLevel, createGamePvE, deleteGamePvE, leftClick, rightClick, resetGame } from "../api/privateApi";
-import { Board } from "./Board";
-import { BoardInfo } from "./BoardInfo";
+import { useEffect, useState } from "react"
+import { createGamePvEOffline, leftClickGamePvEOffline, levelChangeGamePvEOffline, resetGamePvEOffline, rightClickGamePvEOffline } from "../api/publicApi";
+import { useAudioSettingsContext } from "../contexts/AudioSettingsContext";
 import { useEventSourceContext } from "../contexts/EventSourceContext";
 import { gameConfigs } from "../utils/gameconfigs";
+import { BoardInfo } from "./BoardInfo";
+import { Board } from "./Board";
 import { FinalGameModal } from "./FinalGameModal";
-import { useAudioSettingsContext } from "../contexts/AudioSettingsContext";
 
-export const GameController = () => {
-    const { eventSource } = useEventSourceContext();
+
+export const GameControllerV2 = () => {
+    //const { eventSource } = useEventSourceContext();
     const { playAudio } = useAudioSettingsContext();
 
-    // Solo 
+    const [matchId, setMatchId] = useState();
     const [isLoading, setIsLoading] = useState(true);
     const [isGameRunning, setIsGameRunning] = useState(false);
     const [firstClicked, setFirstClicked] = useState(false);
@@ -38,19 +39,26 @@ export const GameController = () => {
     const [results, setResults] = useState({});
     const [reset, setReset] = useState(false);
 
+    const [eventSource, setEventSource] = useState(null);
+
     useEffect(() => {
         const create = async () => {
-            const response = await createGamePvE();
+            const response = await createGamePvEOffline();
             if (response.ok) {
-                setIsLoading(false);
+                const data = await response.json();
+                setMatchId(data);
                 setIsGameRunning(true);
+                const eventSource = new EventSource(`http://localhost:3000/api/public/sse/offline/${data}`);
+                setEventSource(eventSource);
+                setIsLoading(false);
+
+                return () => {
+                    eventSource.close();
+                }
             }
         }
-    
+
         create();
-        return () => {
-            deleteGamePvE();
-        }
     }, []);
 
     useEffect(() => {
@@ -67,6 +75,7 @@ export const GameController = () => {
     /**
      * Eventos SSE
      */
+    
     const handleGameFinished = (event) => {
         setIsGameRunning(false);
         setFirstClicked(false);
@@ -81,14 +90,12 @@ export const GameController = () => {
         setResults(JSON.parse(event.data));
     }
 
-
     /**
      * ****************************************************************
      */
 
-
     const handleLevelChange = async (level) => {
-        const response = await changeLevel(level);
+        const response = await levelChangeGamePvEOffline(matchId, level);
         if (response.ok) {
             setIsGameRunning(true);
             setFirstClicked(false);
@@ -100,7 +107,7 @@ export const GameController = () => {
     }
 
     const handleReset = async () => {
-        const response = await resetGame();
+        const response = await resetGamePvEOffline(matchId);
         if (response.ok) {
             setIsGameRunning(true);
             setFirstClicked(false);
@@ -156,7 +163,7 @@ export const GameController = () => {
 
         if (isGameRunning) {
             if (event && firstClicked) {
-                const response = await rightClick(position);
+                const response = await rightClickGamePvEOffline(matchId, position);
                 if (response.ok) {
                     const data = await response.json();
                     handleSetCells(data);
@@ -168,7 +175,7 @@ export const GameController = () => {
                 }
                 
             } else {
-                const response = await leftClick(position);
+                const response = await leftClickGamePvEOffline(matchId, position);
                 if (response.ok) {
                     playAudio();
                     const data = await response.json();
@@ -182,11 +189,11 @@ export const GameController = () => {
     }
 
     if (isLoading) {
-        return <h1>Loading game info...</h1>
+        return <h2>Loading data...</h2>
     }
 
     return (
-        <>  
+        <>
             <div className="flex flex-col justify-start items-center gap-y-10 w-full">
                 <div className="mt-10">
                     <BoardInfo
@@ -213,5 +220,5 @@ export const GameController = () => {
                 <FinalGameModal isOpen={openModal} onClose={() => setOpenModal(false)} result={results} />
             </div>
         </>
-    );
+    )
 }

@@ -37,7 +37,7 @@ export const Timer = ({ running = false, reconnectionTime}) => {
 
     return (
         <>
-            <p style={{fontWeight: 'bold'}}>Time {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</p>
+            <p style={{fontWeight: 'bold'}}>{String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}</p>
         </>
     )
 }

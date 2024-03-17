@@ -1,3 +1,4 @@
+import { Slider } from "../components/Slider"
 
 
 export const Index = () => {
@@ -6,7 +7,9 @@ export const Index = () => {
 
     return (
         <>
-            <h2>Index Page</h2>
+            <div className="flex justify-center w-full">
+                <Slider />
+            </div>
         </>
     )
 }

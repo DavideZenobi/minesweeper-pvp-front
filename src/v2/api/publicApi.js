@@ -57,3 +57,62 @@ export const authenticate = async () => {
 
     return response;
 }
+
+/**
+ * Game PvE Offline Controller
+ */
+
+export const createGamePvEOffline = async () => {
+    const response = await fetch(publicUrl + `/gamepveoffline/create`, {
+        method: 'GET'
+    });
+
+    return response;
+}
+
+export const leftClickGamePvEOffline = async (matchId, position) => {
+    const data = {position: position};
+    const response = await fetch(publicUrl + `/gamepveoffline/leftClick/${matchId}`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+    return response;
+}
+
+export const rightClickGamePvEOffline = async (matchId, position) => {
+    const data = {position: position};
+    const response = await fetch(publicUrl + `/gamepveoffline/rightClick/${matchId}`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+    return response;
+}
+
+export const resetGamePvEOffline = async (matchId) => {
+    const response = await fetch(publicUrl + `/gamepveoffline/reset/${matchId}`, {
+        method: 'GET'
+    });
+
+    return response;
+}
+
+export const levelChangeGamePvEOffline = async (matchId, level) => {
+    const data = {level: level};
+    const response = await fetch(publicUrl + `/gamepveoffline/levelChange/${matchId}`, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+
+    return response;
+}

@@ -28,7 +28,7 @@ export const Login = () => {
 
         if (response.ok) {
             showSuccessLogin();
-            navigate('/home');
+            navigate('/');
         } else {
             showFailLogin();
             setUsername('');

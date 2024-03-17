@@ -6,7 +6,6 @@ import reportWebVitals from './reportWebVitals';
 import { AuthProvider } from './v2/contexts/AuthContext';
 import { UserQueueProvider } from './v2/contexts/UserQueueContext';
 import { EventSourceProvider } from './v2/contexts/EventSourceContext';
-import { WindowSizeProvider } from './v2/contexts/WindowSizeContext';
 import { SnackbarProvider } from './v2/contexts/SnackbarContext';
 import { AudioSettingsProvider } from './v2/contexts/AudioSettingsContext';
 
@@ -21,7 +20,7 @@ root.render(
           </UserQueueProvider>
         </EventSourceProvider>
       </AuthProvider>
-  </SnackbarProvider>
+    </SnackbarProvider>
   </AudioSettingsProvider>
 );
 

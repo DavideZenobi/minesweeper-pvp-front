@@ -6,9 +6,7 @@ export const Chronometer = () => {
     const [seconds, setSeconds] = useState(0);
 
     useEffect(() => {
-        let intervalId;
-
-        intervalId = setInterval(() => {
+        const intervalId = setInterval(() => {
             setSeconds((prevSeconds) => {
                 if (prevSeconds + 1 === 60) {
                     setMinutes(prevMinutes => prevMinutes + 1);

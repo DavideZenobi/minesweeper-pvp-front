@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react"
 import { gameConfigs } from "../utils/gameconfigs";
 import { Timer } from "./Timer";
 import { Countdown } from "../components/Countdown";

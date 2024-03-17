@@ -23,6 +23,12 @@ export const OpponentsBoardModal = ({ isOpen, setIsOpen, gameConfig, updatedCell
     );
 
     useEffect(() => {
+        if (isOpen) {
+            openModal();
+        }
+    }, [isOpen]);
+
+    useEffect(() => {
         if (updatedCells !== null) {
             setCells(prevCells => {
                 const newObjectToSet = [...prevCells];
@@ -44,36 +50,22 @@ export const OpponentsBoardModal = ({ isOpen, setIsOpen, gameConfig, updatedCell
         }
     }, [updatedCells]);
 
-    const containerStyle = {
-        width: gameConfig.width + 50,
-        height: gameConfig.width + 50,
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        border: '2px solid black',
-        borderRadius: '20px',
-        backgroundColor: 'lightsteelblue',
-        rowGap: '20px',
+    const openModal = () => {
+        const dialog = document.getElementById('opponent-board-modal');
+        dialog.showModal();
     }
 
-    const boardStyle = {
-        display: 'flex',
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        width: gameConfig.width,
-        height: gameConfig.height,   
+    const closeModal = () => {
+        const dialog = document.getElementById('opponent-board-modal');
+        dialog.close();
+        setIsOpen(false);
     }
 
     return (
         <>
-            <Dialog
-                open={isOpen}
-                onClose={() => setIsOpen(false)}
-                PaperProps={{ sx: { maxWidth: 'none', borderRadius: '20px' } }}
-            >
-                <Box sx={containerStyle}>
-                    <Box sx={boardStyle}>
+            <dialog id="opponent-board-modal" className="backdrop:backdrop-blur-sm p-2 rounded-sm bg-gray-800">
+                <div className="flex flex-col items-center gap-y-2">
+                    <div className="flex flex-wrap w-[750px] ">
                         {cells.map((row, rowIndex) => (
                             row.map((col, colIndex) => (
                                 <OpponentCell
@@ -82,9 +74,10 @@ export const OpponentsBoardModal = ({ isOpen, setIsOpen, gameConfig, updatedCell
                                 />
                             ))
                         ))}
-                    </Box>
-                </Box>
-            </Dialog>
+                    </div>
+                    <div onClick={closeModal} className="text-slate-300 px-2 rounded-sm bg-blue-600 text-center w-20 cursor-pointer hover:bg-blue-500">Close</div>
+                </div>
+            </dialog>
         </>
     )
 }

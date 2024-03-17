@@ -9,13 +9,19 @@ import SettingsIcon from '../../static/settings.png';
 import { useNavigate } from "react-router-dom";
 import { SideBarItem } from "./SideBarItem";
 import { SnackbarCustom } from "../SnackbarCustom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Snackbar } from "@mui/material";
 import { SettingsModal } from "../SettingsModal";
+import { useUserQueueContext } from "../../contexts/UserQueueContext";
+import { Chronometer } from "../Chronometer";
+import { useEventSourceContext } from "../../contexts/EventSourceContext";
+import { FindMatchModal } from "../modals/FindMatchModal";
 
 export const SideBar = () => {
+    const { eventSource } = useEventSourceContext();
     const { isAuthenticated } = useAuthContext();
     const { user, logoutCx } = useAuthContext();
+    const { isInQueue, remove } = useUserQueueContext();
 
     const navigate = useNavigate();
 
@@ -35,6 +41,13 @@ export const SideBar = () => {
         setOpenSnackbar(false);
     }
 
+    const handleLeaveQueue = async () => {
+        const response = await remove();
+        if (response.ok) {
+
+        }
+    }
+
     return (
         <>
             <div id="sidebar" className="flex flex-col justify-between gap-y-3 border-r border-black w-16 lg:w-44 h-full bg-gray-800">
@@ -44,9 +57,22 @@ export const SideBar = () => {
                             <p onClick={() => navigate('/')} className="text-2xl text-slate-300 hidden lg:flex">Minesweeper</p>
                             <img src={LoginIcon} alt="pvp" className='w-6 h-6 mx-3 flex lg:hidden'></img>
                         </div>
-                        <SideBarItem text='Singleplayer' icon={SingleplayerIcon} onClick={() => navigate('/game')} />
-                        <SideBarItem text='Multiplayer' icon={PvpIcon} onClick={() => navigate('/game')} />
+                        <SideBarItem text='Singleplayer' icon={SingleplayerIcon} onClick={() => navigate('/gameoffline')} />
+                        <SideBarItem text='Multiplayer' icon={PvpIcon} onClick={() => navigate('/multiplayer')} />
                         <SideBarItem text='History' icon={GameHistoryIcon} onClick={() => navigate('/history')} />
+                    </div>
+                    <div>
+                    {isInQueue
+                            ?   <div
+                                    id="queue"
+                                    onClick={handleLeaveQueue}
+                                    className="bg-blue-500 hover:bg-red-600 flex justify-center font-bold mt-5 mx-auto max-w-36 py-1 rounded-md cursor-pointer text-center align-middle"
+                                >
+                                    <p className="hidden lg:block">Queue&nbsp;</p>
+                                    <Chronometer />
+                                </div>                                    
+                            :   null
+                        }
                     </div>
                     <div className="flex flex-col justify-start">
                         {!isAuthenticated &&
@@ -80,6 +106,7 @@ export const SideBar = () => {
                 </div>
             </div>
             <SettingsModal isOpen={openSettingsModal} onClose={() => setOpenSettingsModal(false)} />
+            <FindMatchModal />
             <SnackbarCustom active={openSnackbar} text='Logged out succesfully!' onClose={handleOnCloseSnackbar} />
             
         </>

@@ -1,31 +1,33 @@
-import { Box } from "@mui/material"
-
 
 export const StaticCell = ({ cell, size }) => {
+
+    // Problemas con tailwindcss
+    const outerDivSize = `w-[${size + 1}px] h-[${size + 1}px]`;
+    const innerDivSize = `w-[${size}px] h-[${size}px]`;
 
     return (
         <>
             {cell.isOpen
-                ? 
-                <Box onContextMenu={(e) => e.preventDefault()} sx={{ height: size + 1, width: size + 1, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                    <Box sx={{ height: size, width: size, backgroundColor: 'lightgrey', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                ?
+                <div className={`w-[17px] h-[17px] flex items-center justify-center pointer-events-none`}>
+                    <div className={`w-[16px] h-[16px] flex items-center justify-center bg-blue-300`}>
                         {cell.isMine
-                            ? <p style={{ color: 'red', margin: '0', textAlign: 'center', fontWeight: 'bold', fontSize: '12px' }}>M</p>
-                            : cell.neighborMines === 0
-                                ? null
-                                : <p style={{ margin: 0, textAlign: 'center', fontWeight: 'bold', fontSize: '12px' }}>{cell.neighborMines}</p>
+                            ?   <p className="text-red-600 text-center font-bold text-sm m-0">M</p>
+                            :   cell.neighborMines === 0
+                                ?   null
+                                :   <p className="text-center font-bold text-sm m-0">{cell.neighborMines}</p>
                         }
-                    </Box>
-                </Box>
-                : 
-                <Box onContextMenu={(e) => e.preventDefault()} sx={{ height: size + 1, width: size + 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <Box sx={{ height: size, width: size, backgroundColor: 'grey' }}>
+                    </div>
+                </div>
+                :
+                <div className={`w-[17px] h-[17px] flex items-center justify-center pointer-events-none`}>
+                    <div className={`w-[16px] h-[16px] bg-gradient-to-b from-cyan-400 to-cyan-600`}>
                         {cell.isFlagged
-                            ? <p style={{ color: 'yellow', margin: '0', textAlign: 'center', fontSize: '12px' }}>F</p>
-                            : null
+                            ?   <p className="text-yellow-300 font-bold m-0 text-center text-sm">F</p>
+                            :   null
                         }
-                    </Box>
-                </Box>
+                    </div>
+                </div>
             }
         </>
     )

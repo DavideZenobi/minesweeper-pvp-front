@@ -6,10 +6,8 @@ export const Countdown = ({ running = false, startTime, onFinish, reconnectionTi
 
     // Cuenta atrás
     useEffect(() => {
-        let intervalId;
-
         if (running) {
-            intervalId = setInterval(() => {
+            const intervalId = setInterval(() => {
                 setSeconds(prevSeconds => {
                     if (prevSeconds === 1) {
                         clearInterval(intervalId);
@@ -20,10 +18,10 @@ export const Countdown = ({ running = false, startTime, onFinish, reconnectionTi
                 });
                 
             }, 1 * 1000);
-        }
 
-        return () => {
-            clearInterval(intervalId);
+            return () => {
+                clearInterval(intervalId);
+            }
         }
     }, [running]);
 
@@ -43,7 +41,7 @@ export const Countdown = ({ running = false, startTime, onFinish, reconnectionTi
 
     return (
         <>
-            <p style={{ fontWeight: 'bold' }}>{seconds}</p>
+            <p className="font-bold text-center">{seconds}</p>
         </>
     )
 }

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useEventSourceContext } from "../contexts/EventSourceContext"
 import { Avatar, Box, Button } from "@mui/material";
 import { Board } from "./Board";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { getMatchConfig, getMatchInfoForReconnect, getUserStatus, handleLeftClick, handleRightClick, userIsReady } from "../api/privateApi";
 import { Timer } from "./Timer";
 import { MovementTimer } from "./MovementTimer";
@@ -10,66 +10,8 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { FinalGameModal } from "./FinalGameModal";
 import { Countdown } from "./Countdown";
 import { OpponentsBoardModal } from "./OpponentsBoardModal";
-import opener from '../utils/opener.wav';
-import lose from '../utils/lose.wav';
-import win from '../utils/win.wav';
-import cellOpened from '../utils/cellOpened.wav';
-
-const cloud = {
-    width: '200px',
-    height: '50px',
-    border: '2px solid black',
-    borderRadius: '20px',
-    backgroundColor: 'lightsteelblue',
-    textAlign: 'center', 
-    display: 'flex', 
-    alignItems: 'center', 
-    justifyContent: 'center'
-}
-
-const leftContainer = {
-    width: '25%',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    rowGap: '20px',
-}
-
-const rightContainer = {
-    width: '25%',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-}
-
-const rightContentContainer = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    //rowGap: '20px',
-    border: '2px solid black',
-    borderRadius: '20px',
-    backgroundColor: 'lightsteelblue',
-    width: '300px',
-    height: '500px'
-}
-
-const midContainer = {
-    width: '50%',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    
-}
-
-const midBox = {
-    width: '100%',
-    height: '100%',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-}
+import { BoardInfo } from "./BoardInfo";
+import { gameConfigs } from "../utils/gameconfigs";
 
 const userStatusEnum = {
     waitingToConnect: 'waitingToConnect',
@@ -88,19 +30,39 @@ export const GameController = () => {
 
     const { matchId } = useParams();
 
+    const { state } = useLocation();
+
     // Match states
-    const [usernames, setUsernames] = useState();
+    const [users, setUsers] = useState([
+        {username: state[0], wins: 0},
+        {username: state[1], wins: 0}
+    ]);
     const [isDataLoading, setIsDataLoading] = useState(true);
     const [isGameRunning, setIsGameRunning] = useState(false);
     const [matchConfig, setMatchConfig] = useState({});
     const [currentGame, setCurrentGame] = useState(1);
     const [userStatus, setUserStatus] = useState();
     const [results, setResults] = useState([]);
+    const [cells, setCells] = useState(
+        Array.from({ length: gameConfigs['hard'].squaresPerHeight }, (_unused, rowIndex) => 
+            Array.from({ length: gameConfigs['hard'].squaresPerWidth }, (__unused, colIndex) => (
+                {
+                    isMine: false,
+                    isOpen: false,
+                    isFlagged: false,
+                    neighborMines: 0,
+                    position: {
+                        rowIndex: rowIndex,
+                        colIndex: colIndex,
+                    }
+                }
+            ))
+        )
+    );
     
     // Timer states
     const [resetMovementTimer, setResetMovementTimer] = useState(false);
     // Board states
-    const [updatedCells, setUpdatedCells] = useState(null);
     const [minesLeft, setMinesLeft] = useState(0);
     // Modal states
     const [isFinalGameModalOpen, setIsFinalGameModalOpen] = useState(false);
@@ -142,39 +104,39 @@ export const GameController = () => {
                         
                         switch (data.userStatus) {
                             case userStatusEnum.readyToStart:
-                                setUsernames(data.usernames);
+                                setUsers(data.users);
                                 setUserStatus(data.userStatus);
                                 break;
                             case userStatusEnum.starting:
-                                setUsernames(data.usernames);
+                                setUsers(data.users);
                                 setUserStatus(data.userStatus);
                                 setCurrentGame(data.currentGame);
                                 setUpdatedTimeToStart(data.timeToStart);
                                 break;
                             case userStatusEnum.running:
-                                setUsernames(data.usernames);
+                                setUsers(data.users);
                                 setUserStatus(data.userStatus);
                                 setCurrentGame(data.currentGame);
-                                setUpdatedCells(data.cells);
+                                setCells(data.cells);
                                 setMinesLeft(data.minesLeft);
                                 setUpdatedTimer(data.time);
                                 setUpdatedTimeToMove(data.timeToMove);
                                 setIsGameRunning(true);
                                 break;
                             case userStatusEnum.waiting:
-                                setUsernames(data.usernames);
+                                setUsers(data.users);
                                 setUserStatus(data.userStatus);
                                 setCurrentGame(data.currentGame);
-                                setUpdatedCells(data.cells);
+                                setCells(data.cells);
                                 setMinesLeft(data.minesLeft);
                                 setUpdatedTimer(data.time);
                                 setUpdatedTimeToMove(data.timeToMove);
                                 break;
                             case userStatusEnum.resetting:
-                                setUsernames(data.usernames);
+                                setUsers(data.users);
                                 setUserStatus(data.userStatus);
                                 setCurrentGame(data.currentGame);
-                                setUpdatedCells(data.cells);
+                                setCells(data.cells);
                                 setMinesLeft(data.minesLeft);
                                 setUpdatedTimer(data.time);
                                 setUpdatedTimeToMove(data.timeToMove);
@@ -235,14 +197,23 @@ export const GameController = () => {
     }
 
     const handleGameFinished = () => {
-        const loseAudio = new Audio(lose);
-        loseAudio.play();
         setIsGameRunning(false); 
         setUserStatus(userStatusEnum.waiting);
     }
 
     const handleAllGamesFinished = (event) => {
-        setResults(JSON.parse(event.data));
+        const data = JSON.parse(event.data);
+        setUsers(prevUsers => (
+            prevUsers.map(prevUser => {
+                const matchingUser = data.find(user => user.username === prevUser.username);
+                if (matchingUser) {
+                    return {...prevUser, wins: matchingUser.wins}
+                } else {
+                    return prevUser;
+                }
+            })
+        ))
+        setResults(data);
         setIsFinalGameModalOpen(true);
     }
 
@@ -255,10 +226,11 @@ export const GameController = () => {
         setUpdatedTimeToStart(null);
         setUpdatedTimeToMove(null);
         setUpdatedTimer(null);
-        setUpdatedCells(null);
+        resetCells();
         setCurrentGame((prevCurrentGame) => prevCurrentGame + 1);
         setMinesLeft(95);
         setIsFinalGameModalOpen(false);
+        setIsOpponentsBoardOpen(false);
         setUserStatus(userStatusEnum.starting);
     }
 
@@ -300,125 +272,143 @@ export const GameController = () => {
                 const response = await handleRightClick(matchId, position);
                 if (response.ok) {
                     const updatedCells = await response.json();
-                    setUpdatedCells(updatedCells.data);
-                    const flaggedCellsCounter = updatedCells.data.filter(updatedCell => updatedCell.isFlagged).length;
-                    setMinesLeft(matchConfig.minesQuantity - flaggedCellsCounter);
+                    handleSetCells(updatedCells);
+                    const totalCellsFlagged = updatedCells.filter(updatedCell => updatedCell.isFlagged === true).length;
+                    setMinesLeft(95 - totalCellsFlagged);
                 }
             } else {
                 const response = await handleLeftClick(matchId, position);
                 if (response.ok) {
-                    const sound = new Audio(opener);
-                    sound.volume = 0.1;
-                    sound.play();
                     const updatedCells = await response.json();
                     setResetMovementTimer(!resetMovementTimer);
-                    setUpdatedCells(updatedCells.data);
+                    handleSetCells(updatedCells);
                 }
             }
         }
     }
 
+    const resetCells = () => {
+        setCells(
+            Array.from({ length: gameConfigs['hard'].squaresPerHeight }, (_unused, rowIndex) => 
+                Array.from({ length: gameConfigs['hard'].squaresPerWidth }, (__unused, colIndex) => (
+                    {
+                        isMine: false,
+                        isOpen: false,
+                        isFlagged: false,
+                        neighborMines: 0,
+                        position: {
+                            rowIndex: rowIndex,
+                            colIndex: colIndex,
+                        }
+                    }
+                ))
+            )
+        );
+    }
+    
+    const handleSetCells = (newCells) => {
+        setCells(prevCells => {
+            const newObjectToSet = [...prevCells];
+
+            prevCells.forEach((prevRowCells, rowIndex) => {
+                prevRowCells.forEach((prevCell, colIndex) => {
+                    newCells.forEach(newCell => {
+                        if (prevCell.position.rowIndex === newCell.position.rowIndex && prevCell.position.colIndex === newCell.position.colIndex) {
+                            newObjectToSet[rowIndex][colIndex] = newCell;
+                        }
+                    });
+                })
+                
+            })
+
+            return newObjectToSet;
+        });
+    }
+
     const handleOnZeroCountdown = () => {
-        navigate('/home');
+        navigate('/');
+    }
+
+    if (isDataLoading) {
+        return <h2 className="text-3xl text-slate-300">Loading...</h2>
     }
 
     return (
         <>
-            {isDataLoading
-                ?   <h2>Loading...</h2>
-                :   <>
-                        <Box sx={leftContainer}>
-                            <Box sx={cloud}>
-                                <Timer
-                                    key={currentGame}
-                                    running={isGameRunning}
-                                    reconnectionTime={updatedTimer}
-                                />
-                            </Box>
-                            <Box sx={cloud}>
-                                <MovementTimer
-                                    key={currentGame}
-                                    running={isGameRunning} 
-                                    reset={resetMovementTimer}
-                                    updatedTimeToMove={updatedTimeToMove}
-                                />
-                            </Box>
-                            <Box sx={cloud}>
-                                <p style={{fontWeight: 'bold'}}>Mines left: {minesLeft}</p>
-                            </Box>
-                        </Box>
-                        <Box sx={midContainer}>
-                            <Box sx={midBox}>
-                                <Board 
-                                    key={currentGame}
-                                    gameConfig={matchConfig}
-                                    onClick={handleOnClick}
-                                    updatedCells={updatedCells}
-                                />
-                            </Box>
-                        </Box>
-                        <Box sx={rightContainer}>
-                            <Box sx={rightContentContainer}>
-                                <h1>Match info</h1>
-                                <h2>Status: Running</h2>
-                                <p style={{fontWeight: 'bold'}}>Current game: {currentGame}</p>
-                                <Box sx={{
-                                    display: 'flex', 
-                                    flexDirection: 'row',
-                                    justifyContent: 'center',
-                                    alignItems: 'center'
-                                }}>
-                                    <Avatar>
-                                        <AccountCircleIcon />
-                                    </Avatar>
-                                    <p>User</p>
-                                    <p>0</p>
-                                    <p>-</p>
-                                    <p>0</p>
-                                    <p>User 2</p>
-                                    <Avatar>
-                                        <AccountCircleIcon />
-                                    </Avatar>
-                                </Box>
-                                {userStatus === userStatusEnum.waiting
-                                    ?   <>
-                                            <h2>Waiting for opponent</h2>
-                                            <Button variant="contained" onClick={() => setIsOpponentsBoardOpen(true)}>Opponent Board</Button>
-                                        </>
-                                    :   null
-                                }
-                                {userStatus === userStatusEnum.resetting
-                                    ?   <>
-                                            <h2>Resets in <Countdown running={true} startTime={20} reconnectionTime={updatedTimeToNextGame}/></h2>
-                                            <Button variant="contained" onClick={() => setIsFinalGameModalOpen(true)}>Results</Button>
-                                            <Button variant="contained" onClick={() => setIsOpponentsBoardOpen(true)}>Opponent Board</Button>
-                                        </>
-                                    :   null
-                                }
-                                {userStatus === userStatusEnum.starting
-                                    ?   <h2>Starts in <Countdown running={true} startTime={5} reconnectionTime={updatedTimeToStart} /></h2>
-                                    :   null
-                                }
-                                {userStatus === userStatusEnum.finished
-                                    ?   <h2>Exiting match in <Countdown running={true} startTime={60} onFinish={handleOnZeroCountdown} /></h2>
-                                    :   null
-                                }
-                            </Box>
-                        </Box>
-                        <FinalGameModal 
-                            isOpen={isFinalGameModalOpen}
-                            setIsOpen={setIsFinalGameModalOpen}
-                            usersResults={results}
-                        />
-                        <OpponentsBoardModal 
-                            key={currentGame}
-                            isOpen={isOpponentsBoardOpen}
-                            setIsOpen={setIsOpponentsBoardOpen}
-                            gameConfig={matchConfig}
-                            updatedCells={opponentsUpdatedCells}
-                        />
-                    </>
-            }
+            <div className="flex justify-evenly">
+                <BoardInfo
+                    key={currentGame}
+                    hasGameStarted={isGameRunning}
+                    updatedMinesLeft={minesLeft}
+                    reset={resetMovementTimer}
+                    onCellLeftClicked={updatedTimeToMove}
+                />
+                <div className="flex flex-col text-slate-300">
+                    <h2 className="text-2xl">Match info</h2>
+                    <h4 className="text-lg">Status: </h4>
+                    <p>Game: {currentGame}</p>
+                    <p>{users[0].username} {users[0].wins} -- {users[1].wins} {users[1].username}</p>
+                </div>
+            </div>
+            <div className="flex justify-center h-20 text-slate-300">
+                {userStatus === userStatusEnum.waiting
+                    ?   <>
+                            <div className="flex gap-x-5 items-center">
+                                <h2 className="text-2xl">Waiting for opponent</h2>
+                                <div onClick={() => setIsOpponentsBoardOpen(true)} className="bg-blue-500 hover:bg-blue-400 rounded-md p-2 cursor-pointer">Opponent board</div>
+                            </div> 
+                        </>
+                    : null
+                }
+                {userStatus === userStatusEnum.resetting
+                    ?   <>
+                            <div className="flex gap-x-5 items-center">
+                                <h2 className="text-2xl">Resets in</h2>
+                                <Countdown running={true} startTime={20} reconnectionTime={updatedTimeToNextGame} />
+                                <div onClick={() => setIsFinalGameModalOpen(true)} className="bg-blue-500 hover:bg-blue-400 rounded-md p-2 cursor-pointer">Results</div>
+                                <div onClick={() => setIsOpponentsBoardOpen(true)} className="bg-blue-500 hover:bg-blue-400 rounded-md p-2 cursor-pointer">Opponent board</div>
+                            </div>
+                        </>
+                    : null
+                }
+                {userStatus === userStatusEnum.starting
+                    ?   <>
+                            <div className="flex gap-x-5 items-center">
+                                <h2 className="text-2xl">Starts in</h2>
+                                <Countdown running={true} startTime={5} reconnectionTime={updatedTimeToStart} />
+                            </div>
+                        </>
+                    : null
+                }
+                {userStatus === userStatusEnum.finished
+                    ?   <>
+                            <div className="flex gap-x-5 items-center">
+                                <h2 className="text-2xl">Exiting match in</h2>
+                                <Countdown running={true} startTime={60} onFinish={handleOnZeroCountdown} />
+                            </div>
+                        </>
+                    : null
+                }
+            </div>
+            <div className="h-full flex justify-center items-center">
+                <Board
+                    key={currentGame}
+                    cells={cells}
+                    onClick={handleOnClick}
+                />
+            </div>
+            <FinalGameModal
+                isOpen={isFinalGameModalOpen}
+                setIsOpen={setIsFinalGameModalOpen}
+                usersResults={results}
+            />
+            <OpponentsBoardModal
+                key={currentGame}
+                isOpen={isOpponentsBoardOpen}
+                setIsOpen={setIsOpponentsBoardOpen}
+                gameConfig={matchConfig}
+                updatedCells={opponentsUpdatedCells}
+            />
         </>
     )
 }

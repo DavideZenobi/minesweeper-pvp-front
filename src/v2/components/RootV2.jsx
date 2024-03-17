@@ -11,7 +11,6 @@ export const RootV2 = () => {
                 <div className="hidden md:flex">
                     <SideBar />
                 </div>
-                <h2 className="flex md:hidden">test</h2>
                 <Outlet />
             </div>
         </>

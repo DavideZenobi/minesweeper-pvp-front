@@ -4,17 +4,11 @@ import { GameController } from "../minesweeperpvp/GameController"
 
 export const GamePvP = () => {
 
-    const containerStyle = {
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'row',
-    }
-
     return (
         <>
-            <Box sx={containerStyle}>
+            <div className="flex flex-col h-full w-full">
                 <GameController />
-            </Box>
+            </div>
         </>
     )
 }

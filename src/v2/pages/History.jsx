@@ -1,4 +1,4 @@
-import { Box, Pagination, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material"
+import { Pagination } from "@mui/material"
 import { useEffect, useState } from "react"
 import { getMatchesHistoryByUser } from "../api/privateApi";
 import { useAuthContext } from "../contexts/AuthContext";
@@ -10,29 +10,13 @@ export const History = () => {
 
     const navigate = useNavigate();
 
-    const containerStyle = {
-        width: '1000px',
-        height: '550px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        rowGap: '20px',
-        border: '2px solid black',
-        borderRadius: '30px',
-        backgroundColor: 'lightsteelblue',
-    }
-
-    const rowTableStyle = {
-        borderBottom: '1px solid black'
-    }
-
     const [isLoading, setIsLoading] = useState(true);
     const [matches, setMatches] = useState([]);
     const [matchesToDisplay, setMatchesToDisplay] = useState();
 
     // Pagination states
     const [currentPage, setCurrentPage] = useState(1);
-    const [matchesPerPage, setMatchesPerPage] = useState(5);
+    const [matchesPerPage, setMatchesPerPage] = useState(10);
     const [totalPages, setTotalPages] = useState();
 
     useEffect(() => {
@@ -61,41 +45,39 @@ export const History = () => {
 
     return (
         <>
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                <Box sx={containerStyle}>
-                    <h3>Matches</h3>
-                    <Table sx={{ width: 800, border: '2px solid black' }} aria-label="simple table">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell sx={{fontWeight: 'bold', borderRight: '1px solid black', borderBottom: '1px solid black'}} align="center"><h3>Number</h3></TableCell>
-                                <TableCell sx={{fontWeight: 'bold', borderRight: '1px solid black', borderBottom: '1px solid black'}} align="center"><h3>Opponent</h3></TableCell>
-                                <TableCell sx={{fontWeight: 'bold', borderRight: '1px solid black', borderBottom: '1px solid black'}} align="center"><h3>Total games</h3></TableCell>
-                                <TableCell sx={{fontWeight: 'bold', borderBottom: '1px solid black'}} align="center">Date</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {matchesToDisplay.map((match, index) => (
-                                <TableRow 
-                                    key={match.id} 
-                                    onClick={() => navigate(`/history/${match.id}`)} 
-                                    sx={{ 
-                                        backgroundColor: match.winner === user.username ? '#9ADE7B' : '#EB8181',
-                                        '&:hover': {
-                                            backgroundColor: match.winner === user.username ? '#82ba68' : '#d16969',
-                                            cursor: 'pointer',
-                                        }
-                                    }}>
-                                    <TableCell align="center">{(currentPage - 1) * matchesPerPage + index + 1}</TableCell>
-                                    <TableCell align="center">{match.opponentUsername}</TableCell>
-                                    <TableCell align="center">{match.totalGames}</TableCell>
-                                    <TableCell align="center">{match.datetimeStarted}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                    <Pagination variant="outlined" color="primary" count={totalPages} page={currentPage} onChange={handlePageChange} />
-                </Box>
-            </Box>    
+            <div className="flex justify-center mt-36 w-full">
+                {matchesToDisplay.length > 0
+                    ?
+                        <div className="w-200  flex flex-col items-center">
+                            <h3 className="text-2xl text-slate-300">Matches</h3>
+                            <table className="w-200">
+                                <thead className="text-slate-300">
+                                    <tr>
+                                        <th>Number</th>
+                                        <th>Opponent</th>
+                                        <th>Total games</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {matchesToDisplay.map((match, index) => (
+                                        <tr key={match.id} onClick={() => navigate(`/history/${match.id}`)} className={`${match.winner === user.username ? 'bg-green-500' : 'bg-red-500'} ${match.winner === user.username ? 'hover:bg-green-400' : 'hover:bg-red-400'} text-center cursor-pointer`} >
+                                            <td>{(currentPage - 1) * matchesPerPage + index + 1}</td>
+                                            <td>{match.opponentUsername}</td>
+                                            <td>{match.totalGames}</td>
+                                            <td>{match.datetimeStarted}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                            <Pagination variant="outlined" color="primary" count={totalPages} page={currentPage} onChange={handlePageChange} />
+                        </div>
+                    :
+                        <div className="flex justify-center items-center">
+                            <h2 className="text-3xl">No matches found</h2>
+                        </div>
+                }
+            </div>
         </>
     )
 }

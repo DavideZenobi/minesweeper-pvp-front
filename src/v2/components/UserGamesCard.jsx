@@ -1,4 +1,4 @@
-import { Box, Tab, Tabs } from "@mui/material"
+import { Tab, Tabs } from "@mui/material"
 import { useState } from "react"
 import { StaticCell } from "./StaticCell";
 
@@ -11,55 +11,31 @@ export const UserGamesCard = ({ data }) => {
         setSelectedTab(value);
     }
 
-    const containerStyle = {
-        width: '500px',
-        height: '650px',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        border: '2px solid black',
-        borderRadius: '30px',
-        backgroundColor: 'lightsteelblue',
-    }
-
-    const boardStyle = {
-        display: 'flex',
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        width: '442px',
-        height: '442px'
-    }
-
-    console.log(data);
-
     return (
         <>
-            <Box sx={containerStyle}>
-                <h2>{data.username}</h2>
+            <div className="flex flex-col items-center border border-gray-600 rounded-sm w-112 bg-gray-800">
+                <h2 className="text-slate-300 text-3xl">{data.username}</h2>
                 <Tabs value={selectedTab} onChange={handleChangeTab}>
                     {data.games.map((game, index) => (
-                        <Tab key={game.game_number} label={game.game_number} sx={{fontWeight: 'bold'}} />
+                        <Tab key={game.game_number} label={game.game_number} className="font-bold" />
                     ))}
                 </Tabs>
                 {data.games.map((game, index) => (
-                    <Box 
-                        key={game.game_number}
-                        hidden={selectedTab + 1 !== game.game_number}
-                    >
-                        <Box sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-evenly'}}>
-                            <p style={{fontWeight: 'bold'}}>Score: {game.score}</p>
-                            <p style={{fontWeight: 'bold'}}>Time: {game.time} seconds</p>
-                        </Box>
-                        <Box sx={boardStyle}>
+                    <div key={game.game_number} hidden={selectedTab + 1 !== game.game_number}>
+                        <div className="flex justify-evenly text-slate-300">
+                            <p className="font-bold">Score: {game.score}</p>
+                            <p className="font-bold">Time: {game.time} seconds</p>
+                        </div>
+                        <div className="flex flex-wrap justify-center">
                             {game.cells.map((row, rowIndex) => (
                                 row.map((cell, colIndex) => (
                                     <StaticCell key={`${rowIndex}-${colIndex}`} cell={cell} size={16} />
                                 ))
                             ))}
-                        </Box>
-                    </Box>
+                        </div>
+                    </div>
                 ))}
-            </Box>
+            </div>
         </>
     )
 }

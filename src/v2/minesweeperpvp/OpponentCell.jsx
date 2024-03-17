@@ -5,28 +5,26 @@ export const OpponentCell = ({ cell }) => {
     return (
         <>
             {cell.isOpen
-                ? <div onContextMenu={(e) => e.preventDefault()}>
-                    <Box sx={{ height: '25px', width: '25px', display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
-                        <Box sx={{ height: '24px', width: '24px', backgroundColor: 'lightgrey' }}>
+                ?   <div onContextMenu={(e) => e.preventDefault()} className="flex justify-center items-center w-[25px] h-[25px]">
+                        <div className="w-[24px] h-[24px] bg-blue-300">
                             {cell.isMine
-                                ? <p style={{ color: 'red', margin: '0', textAlign: 'center', fontWeight: 'bold' }}>M</p>
-                                : cell.neighborMines === 0
-                                    ? null
-                                    : <p style={{ margin: 0, textAlign: 'center', fontWeight: 'bold' }}>{cell.neighborMines}</p>
+                                ?   <p className="text-red-500 m-0 text-center font-bold">M</p>
+                                :   cell.neighborMines !== 0 &&
+                                    <p className="text-center m-0">{cell.neighborMines}</p>
                             }
-                        </Box>
-                    </Box>
-                </div>
-                : <div onContextMenu={(e) => e.preventDefault()}>
-                    <Box sx={{ height: '25px', width: '25px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Box sx={{ height: '24px', width: '24px', backgroundColor: 'grey' }}>
-                            {cell.isFlagged
-                                ? <p style={{ color: 'yellow', margin: '0', textAlign: 'center' }}>F</p>
-                                : null
+                        </div>
+                    </div>   
+                :   <div
+                        id={cell.position.rowIndex + '-' + cell.position.colIndex}
+                        onContextMenu={(e) => e.preventDefault()} 
+                        className="flex justify-center items-center w-[25px] h-[25px]"
+                    >
+                        <div className="w-[24px] h-[24px] bg-gradient-to-b from-cyan-400 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700">
+                            {cell.isFlagged &&
+                                <p className="text-orange-200 m-0 text-center font-bold">F</p>
                             }
-                        </Box>
-                    </Box>
-                </div>
+                        </div>
+                    </div>
             }
         </>
     );

@@ -5,6 +5,11 @@ export const Timer = ({ running = false, reset }) => {
     const [seconds, setSeconds] = useState(0);
 
     useEffect(() => {
+        setMinutes(0);
+        setSeconds(0);
+    }, [reset]);
+
+    useEffect(() => {
         if (running) {
             const intervalId = setInterval(() => {
                 setSeconds((prevSeconds) => {
@@ -22,11 +27,6 @@ export const Timer = ({ running = false, reset }) => {
             }
         } 
     }, [running]);
-
-    useEffect(() => {
-        setMinutes(0);
-        setSeconds(0);
-    }, [reset]);
 
     return (
         <>

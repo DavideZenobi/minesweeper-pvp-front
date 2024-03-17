@@ -27,10 +27,8 @@ export const UserQueueProvider = ({ children }) => {
     useEffect(() => {
         if (eventSource) {
             eventSource.addEventListener('user-left-queue', handleLeftQueue);
-        }
 
-        return () => {
-            if (eventSource) {
+            return () => {
                 eventSource.removeEventListener('user-left-queue', handleLeftQueue);
             }
         }

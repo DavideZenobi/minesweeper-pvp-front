@@ -12,38 +12,6 @@ import { useUserQueueContext } from "../../contexts/UserQueueContext";
 import { useNavigate } from "react-router-dom";
 import { Countdown } from "../../minesweeperpvp/Countdown";
 
-const containerStyle = {
-    width: '400px',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    rowGap: '10px',
-    padding: '20px'
-}
-
-const usersContainerStyle = {
-    display: 'flex',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    columnGap: '60px',
-    justifyContent: 'space-evenly'
-}
-
-const userContainerStyle = {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center'
-}
-
-const buttonsContainerStyle = {
-    display: 'flex',
-    flexDirection: 'row',
-    flexGrow: '0.5',
-    columnGap: '20px',
-    justifyContent: 'space-evenly',
-    alignItems: 'flex-end',
-}
-
 export const FindMatchModal = () => {
     const { user } = useAuthContext();
     const navigate = useNavigate();
@@ -52,16 +20,17 @@ export const FindMatchModal = () => {
 
     const matchIdRef = useRef(null);
     
-    const [users, setUsers] = useState();
-    const [isOpen, setIsOpen] = useState(false);
+    const usersRef = useRef(null);
+    const [users, setUsers] = useState([]);
     const [areButtonsDisabled, setAreButtonsDisabled] = useState(false);
+    const [countdownRunning, setCountdownRunning] = useState(false);
 
     useEffect(() => {
         if (eventSource) {
             eventSource.addEventListener('match-found', handleMatchFound);
             eventSource.addEventListener('match-accepted', handleMatchAccepted);
             eventSource.addEventListener('match-cancelled-by-countdown', handleMatchCancelledByCountdown);
-            //eventSource.addEventListener('match-cancelled-by-decline', handleMatchCancelledByDecline);
+            eventSource.addEventListener('match-cancelled-by-decline', handleMatchCancelledByDecline);
             eventSource.addEventListener('user-update', handleUserUpdate);
         }
 
@@ -70,25 +39,34 @@ export const FindMatchModal = () => {
                 eventSource.removeEventListener('match-found', handleMatchFound);
                 eventSource.removeEventListener('match-accepted', handleMatchAccepted);
                 eventSource.removeEventListener('match-cancelled-by-countdown', handleMatchCancelledByCountdown);
-                //eventSource.removeEventListener('match-cancelled-by-decline', handleMatchCancelledByDecline);
+                eventSource.removeEventListener('match-cancelled-by-decline', handleMatchCancelledByDecline);
                 eventSource.removeEventListener('user-update', handleUserUpdate);
             }
         }
     }, [eventSource]);
+
+    useEffect(() => {
+        usersRef.current = users;
+    }, [users]);
 
     // Event listener
     const handleMatchFound = (event) => {
         const data = JSON.parse(event.data);
         setUsers(data.players);
         matchIdRef.current = data.matchId;
-        setIsOpen(true);
+        openModal();
+        setCountdownRunning(true);
     }
 
     // Event listener
     const handleMatchAccepted = (event) => {
-        setIsOpen(false);
+        const usernames = [];
+        usersRef.current.map(user => (
+            usernames.push(user.username)
+        ));
+        closeModal();
         handleCloseModal();
-        navigate(`/game/${matchIdRef.current}`);
+        navigate(`/game/${matchIdRef.current}`, {state: usernames});
     }
 
     // Event listener
@@ -101,13 +79,13 @@ export const FindMatchModal = () => {
     }
 
     // Event listener
-    /*const handleMatchCancelledByDecline = () => {
+    const handleMatchCancelledByDecline = () => {
         setUsers(prevUsers => prevUsers.map(user => (
             user.status === 'declined' ? {...user, status: 'declined'} : user
         )));
         setAreButtonsDisabled(true);
         handleCloseModal();
-    }*/
+    }
 
     // Event listener
     const handleUserUpdate = (event) => {
@@ -148,43 +126,47 @@ export const FindMatchModal = () => {
     }
 
     const handleCloseModal = () => {
-        
+        setCountdownRunning(false);
         setTimeout(() => {
-            setIsOpen(false);
+            closeModal();
             setAreButtonsDisabled(false);
             matchIdRef.current = null;
         }, 1 * 1000);
     }
 
+    const openModal = () => {
+        const dialog = document.getElementById('found-match-modal');
+        dialog.showModal();
+    }
+
+    const closeModal = () => {
+        const dialog = document.getElementById('found-match-modal');
+        dialog.close();
+    }
+
     return (
         <>
-            <Dialog
-                open={isOpen}
-            >
-                <Box sx={containerStyle}>
-                    <DialogTitle sx={{ fontWeight: 'bold '}}>Match founded !</DialogTitle>
-                    <Box sx={usersContainerStyle}>
-                        {users && users.map((currentUser, index) => (
-                            <Box key={index} sx={userContainerStyle}>
-                                <Avatar alt={currentUser.username}>
-                                    <AccountCircleIcon />
-                                </Avatar>
-                                {currentUser.username}
-                                {currentUser.status === 'accepted' && <CheckCircleOutlineIcon color="success" />}
-                                {currentUser.status === 'declined' && <CancelIcon color="error" />}
-                                {currentUser.status === 'pending' && <MoreHorizIcon />}
-                            </Box>
-                        ))}
-                    </Box>
-                    <Box sx={buttonsContainerStyle}>
-                        <Button onClick={handleAcceptMatch} disabled={areButtonsDisabled} variant="contained" color="success">Accept</Button>
-                        <Button onClick={handleDeclineMatch} disabled={areButtonsDisabled} variant="contained" color="error">Decline</Button>
-                    </Box>
-                    <Countdown running={true} startTime={20}/>
-                    <p style={{fontStyle: 'italic', fontWeight: 'bold'}}>**REMEMBER: If you reload the page or change your route during the match, it will count as a defeat **</p>
-                </Box>
-                
-            </Dialog>  
+            <dialog id="found-match-modal" className="backdrop:backdrop-blur-sm p-10 bg-gray-800 rounded-md text-slate-300">
+                <h2 className="text-3xl">Match founded!</h2>
+                <div className="flex justify-evenly">
+                    {users && users.map((currentUser, index) => (
+                        <div key={currentUser.username} className="flex flex-col items-center">
+                            <Avatar alt={currentUser.username}>
+                                <AccountCircleIcon />
+                            </Avatar>
+                            {currentUser.username}
+                            {currentUser.status === 'accepted' && <CheckCircleOutlineIcon color="success" />}
+                            {currentUser.status === 'declined' && <CancelIcon color="error" />}
+                            {currentUser.status === 'pending' && <MoreHorizIcon />}
+                        </div>
+                    ))}
+                </div>
+                <div className="flex justify-center gap-x-5 mt-4">
+                    <button onClick={handleAcceptMatch} disabled={areButtonsDisabled} className="bg-green-600 enabled:hover:bg-green-500 disabled:opacity-25 px-2 rounded-sm enabled:cursor-pointer">Accept</button>
+                    <button onClick={handleDeclineMatch} disabled={areButtonsDisabled} className="bg-red-600 enabled:hover:bg-red-500 disabled:opacity-25 px-2 rounded-sm enabled:cursor-pointer">Decline</button>
+                </div>
+                <Countdown key={countdownRunning} running={countdownRunning} startTime={20}/>
+            </dialog>
         </>
     );
 }
