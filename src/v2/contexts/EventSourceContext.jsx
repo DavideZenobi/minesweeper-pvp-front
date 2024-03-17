@@ -13,7 +13,7 @@ export const EventSourceProvider = ({ children }) => {
 
     useEffect(() => {
         if (isAuthenticated) {
-            const eventSource = new EventSource('http://localhost:3000/api/private/sse', {
+            const eventSource = new EventSource(`${process.env.REACT_APP_PRIVATE_API_URL}/sse`, {
                 withCredentials: true,
             });
             setEventSource(eventSource);

@@ -48,7 +48,7 @@ export const GameControllerV2 = () => {
                 const data = await response.json();
                 setMatchId(data);
                 setIsGameRunning(true);
-                const eventSource = new EventSource(`http://localhost:3000/api/public/sse/offline/${data}`);
+                const eventSource = new EventSource(`${process.env.REACT_APP_PUBLIC_API_URL}/sse/offline/${data}`);
                 setEventSource(eventSource);
                 setIsLoading(false);
 
