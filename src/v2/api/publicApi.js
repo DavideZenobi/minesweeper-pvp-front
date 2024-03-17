@@ -1,4 +1,4 @@
-const publicUrl = 'http://localhost:3000/api/public';
+const publicUrl = process.env.REACT_APP_PUBLIC_API_URL;
 
 export const login = async (username, password) => {
     const dataToSend = {username: username, password: password};

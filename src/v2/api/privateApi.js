@@ -1,4 +1,4 @@
-const privateUrl = 'http://localhost:3000/api/private';
+const privateUrl = process.env.REACT_APP_PRIVATE_API_URL;
 
 export const logout = async () => {
     const response = await fetch(privateUrl + '/logout', {
