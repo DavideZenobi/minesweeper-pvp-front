@@ -42,23 +42,26 @@ export const GameControllerV2 = () => {
     const [eventSource, setEventSource] = useState(null);
 
     useEffect(() => {
+        let eventSource;
         const create = async () => {
             const response = await createGamePvEOffline();
             if (response.ok) {
                 const data = await response.json();
                 setMatchId(data);
                 setIsGameRunning(true);
-                const eventSource = new EventSource(`${process.env.REACT_APP_PUBLIC_API_URL}/sse/offline/${data}`);
+                eventSource = new EventSource(`${process.env.REACT_APP_PUBLIC_API_URL}/sse/offline/${data}`);
                 setEventSource(eventSource);
                 setIsLoading(false);
-
-                return () => {
-                    eventSource.close();
-                }
             }
         }
 
         create();
+
+        return () => {
+            if (eventSource) {
+                eventSource.close();
+            }
+        }
     }, []);
 
     useEffect(() => {

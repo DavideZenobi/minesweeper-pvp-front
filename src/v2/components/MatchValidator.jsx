@@ -14,7 +14,7 @@ export const MatchValidator = ({ children }) => {
             if (response.ok) {
                 setIsLoading(false);
             } else {
-                navigate('/home');
+                navigate('/multiplayer');
             }
         }
 

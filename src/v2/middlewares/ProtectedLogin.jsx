@@ -6,7 +6,7 @@ export const ProtectedLogin = ({ children }) => {
 
 
     if (isAuthenticated) {
-        return <Navigate to='/home' />
+        return <Navigate to='/multiplayer' />
     } else {
         return children;
     }

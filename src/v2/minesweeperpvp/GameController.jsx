@@ -326,7 +326,7 @@ export const GameController = () => {
     }
 
     const handleOnZeroCountdown = () => {
-        navigate('/');
+        navigate('/multiplayer');
     }
 
     if (isDataLoading) {

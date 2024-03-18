@@ -55,10 +55,10 @@ function App() {
 	const routerV2 = createBrowserRouter(
 		createRoutesFromElements(
 			<Route path='/' element={<RootV2 />}>
-				<Route index element={<Index />} />
+				<Route index element={<GamePvEOffline />} />
+				<Route path='gameoffline' element={<GamePvEOffline />} />
 				<Route path='login' element={<ProtectedLogin><Login /></ProtectedLogin>} />
 				<Route path='register' element={<Register />} />
-				<Route path='gameoffline' element={<GamePvEOffline />} />
 				<Route path='confirm/:uuid' element={<AccountConfirmed />} />
 				<Route path='404' element={<div className='flex justify-center items-center w-full'><h2 className='text-slate-300 text-3xl'>Error code: 404 - Page not found</h2></div>} />
 				<Route path='*' element={<ProtectedRoute />} >

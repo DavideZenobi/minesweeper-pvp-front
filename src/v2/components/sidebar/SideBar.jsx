@@ -33,7 +33,7 @@ export const SideBar = () => {
 
         if (response.ok) {
             setOpenSnackbar(true);
-            navigate('/');
+            navigate('/login');
         }
     }
 
