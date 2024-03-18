@@ -13,7 +13,7 @@ export const UserGamesCard = ({ data }) => {
 
     return (
         <>
-            <div className="flex flex-col items-center border border-gray-600 rounded-sm w-112 bg-gray-800">
+            <div className="flex flex-col items-center border border-gray-600 rounded-sm w-128 bg-gray-800">
                 <h2 className="text-slate-300 text-3xl">{data.username}</h2>
                 <Tabs value={selectedTab} onChange={handleChangeTab}>
                     {data.games.map((game, index) => (
