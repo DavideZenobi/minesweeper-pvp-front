@@ -3,7 +3,7 @@
 > [!CAUTION]
 > **_Can't play anymore_**
 > <br>
-> In the end, this is a personal project with the goal of continuing to learn. It doesn't make sense to keep paying for servers, a domain, etc.
+> This is a personal project with the goal of continuing to learn. It doesn't make sense to keep paying for servers, a domain, etc.
 >
 
 Minesweeper PvP is a website where you can play minesweeper alone or against other players.
